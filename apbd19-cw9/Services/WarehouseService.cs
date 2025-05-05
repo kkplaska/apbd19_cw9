@@ -101,4 +101,22 @@ public class WarehouseService : IWarehouseService
             throw new Exception("Something went wrong during transaction");
         }
     }
+
+    public async Task<int> PutProductToWarehouseViaStoredProcedure(ProductWarehouseDto productWarehouseDto)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await using var command = new SqlCommand();
+        
+        command.Connection = connection;
+        await connection.OpenAsync();
+
+        command.CommandText = @"EXEC AddProductToWarehouse @IdProduct, @IdWarehouse, @Amount, @CreatedAt; SELECT SCOPE_IDENTITY()";
+        command.Parameters.AddWithValue("@IdProduct", productWarehouseDto.IdProduct);
+        command.Parameters.AddWithValue("@IdWarehouse", productWarehouseDto.IdWarehouse);
+        command.Parameters.AddWithValue("@Amount", productWarehouseDto.Amount);
+        command.Parameters.AddWithValue("@CreatedAt", productWarehouseDto.CreatedAt);
+
+        var idProductWarehouse = Convert.ToInt32(await command.ExecuteScalarAsync());
+        return idProductWarehouse;
+    }
 }

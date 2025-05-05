@@ -15,18 +15,26 @@ public class WarehouseController : ControllerBase
         _warehouseService = warehouseService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Get(){
-        
-        return Ok();
-    }
-
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] ProductWarehouseDto productWarehouseDto)
     {
         try
         {
             var ret = await _warehouseService.PutProductToWarehouse(productWarehouseDto);
+            return Created("Id: ", ret);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("storedProcedure")]
+    public async Task<IActionResult> PostViaStoredProcedure([FromBody] ProductWarehouseDto productWarehouseDto)
+    {
+        try
+        {
+            var ret = await _warehouseService.PutProductToWarehouseViaStoredProcedure(productWarehouseDto);
             return Created("Id: ", ret);
         }
         catch (Exception ex)
